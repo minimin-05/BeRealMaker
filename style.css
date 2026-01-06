@@ -1,0 +1,84 @@
+:root { --bg-color: #121212; --panel-color: #1e1e1e; --text-color: #ffffff; --accent-color: #ffffff; }
+body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 30px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+h1 { margin-bottom: 30px; font-weight: 700; text-align: center;}
+.main-container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; width: 100%; max-width: 1200px; align-items: flex-start; }
+
+.canvas-container { flex: 1; min-width: 300px; max-width: 500px; display: flex; justify-content: center; align-items: center; background: #000; border-radius: 24px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 3px solid #333;}
+canvas { width: 100%; height: auto; display: block; transition: all 0.3s ease; }
+
+.controls-container { flex: 1; min-width: 300px; max-width: 450px; background: var(--panel-color); padding: 30px; border-radius: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.control-group { margin-bottom: 25px; position: relative; }
+label { display: block; margin-bottom: 10px; font-weight: 600; color: #bbb; font-size: 0.95rem; }
+
+.mode-switcher { display: flex; gap: 10px; margin-bottom: 25px; background: #2c2c2c; padding: 5px; border-radius: 12px; }
+.mode-option { flex: 1; text-align: center; }
+.mode-option input { display: none; }
+.mode-option label { display: block; padding: 12px; border-radius: 8px; cursor: pointer; color: #888; transition: all 0.2s; margin-bottom: 0; }
+.mode-option input:checked + label { background: var(--accent-color); color: black; font-weight: bold; }
+
+input[type=file] { display: block; width: 100%; padding: 12px; background: #2c2c2c; border: 1px solid #444; border-radius: 12px; color: var(--text-color); cursor: pointer; transition: border-color 0.2s; }
+input[type=file]:hover { border-color: #777; }
+input[type=text] { width: 100%; padding: 14px; background: #2c2c2c; border: 1px solid #444; border-radius: 12px; color: var(--text-color); font-size: 16px; box-sizing: border-box; transition: all 0.2s; }
+input[type=text]:disabled { background: #222; color: #555; border-color: #333; cursor: not-allowed; }
+input[type=text]:focus { outline: none; border-color: var(--accent-color); background: #333; }
+
+/* 구글 자동완성 드롭다운 스타일 커스텀 */
+.pac-container { 
+    background-color: #2c2c2c; 
+    border: 1px solid #444; 
+    border-top: none;
+    font-family: 'Inter', sans-serif; 
+    border-radius: 0 0 12px 12px;
+    margin-top: 2px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.pac-item { 
+    border-top: 1px solid #444; 
+    color: #bbb; 
+    padding: 12px; 
+    cursor: pointer; 
+}
+.pac-item:hover { background-color: #3d3d3d; }
+.pac-item-query { color: white; font-weight: bold; font-size: 15px; }
+.pac-icon { filter: invert(1); opacity: 0.7; }
+
+.checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent-color); }
+.checkbox-label { margin-bottom: 0; color: #fff; cursor: pointer; }
+
+.btn-download { width: 100%; padding: 18px; background: var(--accent-color); color: black; border: none; border-radius: 14px; font-size: 18px; font-weight: 700; cursor: pointer; transition: transform 0.1s, background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px;}
+.btn-download:hover { background-color: #e0e0e0; }
+.btn-download:active { transform: scale(0.98); }
+.hidden-assets { display: none; }
+
+/* === 교체(스왑) 버튼 스타일 (위치 수정됨) === */
+.swap-container { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    margin: 10px 0 30px 0; /* 위아래 간격을 넉넉하게 조정 */
+    position: relative;
+    z-index: 10;
+}
+
+.btn-swap { 
+    background-color: #333; 
+    border: 1px solid #555; 
+    color: white; 
+    border-radius: 50%; 
+    width: 50px; /* 버튼 크기를 살짝 키움 */
+    height: 50px; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.btn-swap:hover { 
+    background-color: var(--accent-color); 
+    color: black; 
+    border-color: var(--accent-color);
+    transform: rotate(180deg) scale(1.1); /* 빙글 돌아가는 효과 */
+}

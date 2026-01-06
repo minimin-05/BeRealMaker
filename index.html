@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeReal Maker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>📸 비리얼 메이커 (Google Maps)</h1>
+
+    <div class="main-container">
+        <div class="canvas-container">
+            <canvas id="myCanvas" width="1080" height="1920"></canvas>
+        </div>
+        
+        <div class="controls-container">
+            <label>스타일 선택</label>
+            <div class="mode-switcher">
+                <div class="mode-option">
+                    <input type="radio" name="mode" id="modeFrame" value="frame" checked>
+                    <label for="modeFrame">액자형 (9:16)</label>
+                </div>
+                <div class="mode-option">
+                    <input type="radio" name="mode" id="modeFull" value="fullscreen">
+                    <label for="modeFull">캡처형 (3:4)</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>1. 큰 사진 (배경)</label>
+                <input type="file" id="uploadBack" accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <label>2. 작은 사진 (PIP)</label>
+                <input type="file" id="uploadFront" accept="image/*">
+            </div>
+
+            <div class="swap-container">
+                <button class="btn-swap" onclick="swapImages()" title="사진 서로 바꾸기">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="control-group" id="groupCaption">
+                 <label>3. 캡션</label>
+                 <input type="text" id="captionInput" placeholder="예: Add a caption...">
+            </div>
+            
+            <div class="control-group" id="groupLocation">
+                 <label>4. 위치 검색 (Google Maps)</label>
+                 <input type="text" id="locationInput" placeholder="장소를 검색하세요">
+            </div>
+            
+            <div class="control-group" id="tagControlGroup">
+                <div class="checkbox-wrapper" onclick="document.getElementById('tagToggle').click()">
+                    <input type="checkbox" id="tagToggle" checked> <span class="checkbox-label">5. 태그 기능 사용</span>
+                </div>
+                <input type="text" id="tagInput" placeholder="태그 입력 (기본값: TAG)">
+           </div>
+
+            <button class="btn-download" onclick="downloadImage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                이미지 저장하기
+            </button>
+        </div>
+    </div>
+
+    <div class="hidden-assets">
+        <svg id="icon-location" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256" fill="#ffffff">
+            <g transform="translate(256, 0) scale(-1, 1)">
+                <path d="M248,121.58a15.76,15.76,0,0,1-11.29,15l-.2.06-78,21.84-21.84,78-.06.2a15.77,15.77,0,0,1-15,11.29h-.3a15.77,15.77,0,0,1-15.07-10.67L41,61.41a1,1,0,0,1-.05-.16A16,16,0,0,1,61.25,40.9l.16.05,175.92,65.26A15.78,15.78,0,0,1,248,121.58Z"></path>
+            </g>
+        </svg>
+
+        <svg id="icon-tag" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="24" height="24" viewBox="0 0 64 80" enable-background="new 0 0 64 64" xml:space="preserve" fill="black">
+            <path d="M46,36c5.52,0,10,4.48,10,10c0,5.521-4.48,10-10,10s-10-4.479-10-10C36,40.479,40.48,36,46,36z M51.84,47.499v-3H47.5V40.16h-3v4.339h-4.34v3h4.34v4.34h3v-4.34H51.84z"/>
+            <path d="M19.95,34.02c4.8,2.64,10.609,2.64,15.41,0c0.899,0.06,1.8,0.22,2.67,0.47c-6.36,4.41-7.94,13.13-3.54,19.48c0.35,0.5,0.72,0.97,1.12,1.42c-7.82,1.21-15.83,0.619-23.391-1.73C9.71,52.88,8,50.55,8,47.919c0-3.43,1.18-6.759,3.33-9.439C13.44,35.85,16.57,34.229,19.95,34.02z"/>
+            <path d="M27.65,8c6.63,0,12,5.37,12,12s-5.37,12-12,12c-6.631,0-12-5.37-12-12S21.02,8,27.65,8z"/>
+        </svg>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQtzPToa6OowR61IngqwuKENngESWaiYw&libraries=places&callback=initAutocomplete" async defer></script>
+
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let backImg = new Image(); let frontImg = new Image();
+        let iconLoc = new Image(); let iconTag = new Image();
+        let loadedState = { back: false, front: false, loc: false, tag: false };
+        let currentMode = 'frame';
+
+        const uploadBack = document.getElementById('uploadBack');
+        const uploadFront = document.getElementById('uploadFront');
+        const locationInput = document.getElementById('locationInput');
+        const captionInput = document.getElementById('captionInput');
+        const tagInput = document.getElementById('tagInput');
+        const tagToggle = document.getElementById('tagToggle');
+        
+        const tagControlGroup = document.getElementById('tagControlGroup');
+        const groupCaption = document.getElementById('groupCaption');
+        const groupLocation = document.getElementById('groupLocation');
+
+        const modeRadios = document.querySelectorAll('input[name="mode"]');
+
+        // === 구글 맵스 자동완성 ===
+        function initAutocomplete() {
+            const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                types: ['establishment', 'geocode'],
+                fields: ['name', 'address_components'] 
+            });
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.name) return;
+
+                let finalName = place.name.split(',')[0].trim();
+                let regionName = "";
+                if (place.address_components) {
+                    const component = place.address_components.find(c => 
+                        c.types.includes('locality') || 
+                        c.types.includes('administrative_area_level_1') ||
+                        c.types.includes('country')
+                    );
+                    if (component) { regionName = component.long_name; }
+                }
+
+                if (regionName && !finalName.includes(regionName)) {
+                    locationInput.value = `${finalName}, ${regionName}`;
+                } else {
+                    locationInput.value = finalName;
+                }
+                draw();
+            });
+        }
+
+        // === SVG 아이콘 로딩 함수 ===
+        function loadSvgIcon(svgId, imgObj, stateKey) {
+            const svg = document.getElementById(svgId);
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+            imgObj.onload = () => { loadedState[stateKey] = true; draw(); URL.revokeObjectURL(url); };
+            imgObj.src = url;
+        }
+        
+        loadSvgIcon('icon-location', iconLoc, 'loc');
+        loadSvgIcon('icon-tag', iconTag, 'tag');
+
+
+        uploadBack.addEventListener('change', (e) => handleImageUpload(e, backImg, 'back'));
+        uploadFront.addEventListener('change', (e) => handleImageUpload(e, frontImg, 'front'));
+        
+        [locationInput, captionInput, tagInput].forEach(el => el.addEventListener('input', draw));
+        
+        tagToggle.addEventListener('change', (e) => {
+            tagInput.disabled = !e.target.checked;
+            draw();
+        });
+
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                currentMode = e.target.value;
+                if (currentMode === 'frame') {
+                    canvas.height = 1920; 
+                    tagControlGroup.style.display = 'block';
+                    groupCaption.style.display = 'block';
+                    groupLocation.style.display = 'block';
+                } else {
+                    canvas.height = 1440; 
+                    tagControlGroup.style.display = 'none';
+                    groupCaption.style.display = 'none';
+                    groupLocation.style.display = 'none';
+                }
+                draw();
+            });
+        });
+
+        // === 이미지 교체 기능 ===
+        function swapImages() {
+            const tempSrc = backImg.src;
+            const tempState = loadedState.back;
+
+            backImg.src = frontImg.src;
+            loadedState.back = loadedState.front;
+
+            frontImg.src = tempSrc;
+            loadedState.front = tempState;
+
+            if (backImg.complete && frontImg.complete) {
+                draw();
+            } else {
+                backImg.onload = draw;
+                frontImg.onload = draw;
+            }
+        }
+
+        function handleImageUpload(e, imgObj, stateKey) {
+            if (!e.target.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = (event) => { imgObj.onload = () => { loadedState[stateKey] = true; draw(); }; imgObj.src = event.target.result; };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function draw() {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (currentMode === 'frame') { drawFrameMode(); } else { drawFullScreenMode(); }
+        }
+
+        function drawFrameMode() {
+            const mainMarginX = 50; const mainMarginTop = 150;
+            const mainW = canvas.width - (mainMarginX * 2);
+            const mainH = mainW * (4 / 3);
+            const mainX = mainMarginX; const mainY = mainMarginTop;
+            const mainRadius = 36;
+
+            if (loadedState.back) {
+                ctx.save(); ctx.beginPath(); ctx.roundRect(mainX, mainY, mainW, mainH, mainRadius); ctx.clip();
+                drawImageCover(ctx, backImg, mainX, mainY, mainW, mainH); ctx.restore();
+            }
+
+            if (loadedState.back && tagToggle.checked) {
+                const tagText = tagInput.value.trim() || "TAG";
+                
+                // [수정 1] 폰트 크기 키움 (36px -> 44px)
+                ctx.font = "700 36px 'Inter', sans-serif";
+                
+                // [수정 2] 아이콘 크기 키움 (40 -> 52) / 간격 좁힘 (15 -> 10)
+                const iconSize = 60; 
+                const iconPadding = 0;
+                
+                const textMetrics = ctx.measureText(tagText);
+                const contentW = iconSize + iconPadding + textMetrics.width;
+                
+                // 버튼 좌우 여백 (한쪽 40px 유지)
+                const btnPaddingX = 60; 
+                const btnH = 80; // 버튼 높이도 70 -> 80으로 살짝 키움
+                const btnW = contentW + btnPaddingX; 
+                const btnMargin = 30;
+                const btnX = mainX + btnMargin; const btnY = (mainY + mainH) - btnH - btnMargin;
+
+                const sidePadding = btnPaddingX / 2;
+                const contentStartX = btnX + sidePadding;
+
+                ctx.save(); ctx.fillStyle = "white"; ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 40); ctx.fill();
+                ctx.fillStyle = "black"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+                
+                // [수정 3] 수직 중앙 정렬 공식 적용
+                // 아이콘 Y위치 = 버튼Y + (버튼높이 - 아이콘높이) / 2
+                const iconY = btnY + (btnH - iconSize) / 2 + 4;
+                
+                if (loadedState.tag) { 
+                    ctx.drawImage(iconTag, contentStartX, iconY, iconSize, iconSize); 
+                }
+                
+                // 텍스트 Y위치 = 버튼Y + (버튼높이 / 2) + 미세보정(3)
+                ctx.fillText(tagText, contentStartX + iconSize + iconPadding, btnY + (btnH/2) + 3);
+                ctx.restore();
+            }
+
+            if (loadedState.front) {
+                const smallW = 300; const smallH = 400; const padding = 30;
+                const smallX = mainX + padding; const smallY = mainY + padding;
+                const smallRadius = 28;
+                ctx.save(); ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius); ctx.clip();
+                drawImageCover(ctx, frontImg, smallX, smallY, smallW, smallH); ctx.restore();
+                ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius);
+                
+                // 테두리 두께 5
+                ctx.lineWidth = 5; 
+                ctx.strokeStyle = "black"; ctx.stroke();
+            }
+
+            const centerX = canvas.width / 2;
+            let currentY = mainY + mainH + 80;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+            const captionText = captionInput.value;
+            ctx.font = "600 48px 'Inter', sans-serif";
+            if (captionText) { ctx.fillStyle = "#ffffff"; ctx.fillText(captionText, centerX, currentY); } 
+            else { ctx.fillStyle = "#777777"; ctx.fillText("Add a caption...", centerX, currentY); }
+            
+            currentY += 80;
+
+            const locationText = locationInput.value;
+            if (locationText) {
+                ctx.font = "600 40px 'Inter', sans-serif";
+                const locIconSize = 36; const locIconPadding = 12;
+                const locTextW = ctx.measureText(locationText).width;
+                const locContentW = locIconSize + locIconPadding + locTextW;
+                const pillPaddingX = 36; const pillPaddingY = 24;
+                const pillW = locContentW + (pillPaddingX * 2);
+                const pillH = locIconSize + (pillPaddingY * 2);
+                const pillX = centerX - (pillW / 2);
+                const pillY = currentY - (pillH / 2);
+                const pillRadius = pillH / 2;
+
+                ctx.save();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+                ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, pillRadius); ctx.fill(); ctx.restore();
+
+                const contentStartX = centerX - (locContentW / 2);
+                if (loadedState.loc) { ctx.drawImage(iconLoc, contentStartX, currentY - (locIconSize/2), locIconSize, locIconSize); }
+                ctx.fillStyle = "#ffffff"; ctx.textAlign = "left";
+                ctx.fillText(locationText, contentStartX + locIconSize + locIconPadding, currentY);
+            }
+        }
+
+        function drawFullScreenMode() {
+            if (loadedState.back) { drawImageCover(ctx, backImg, 0, 0, canvas.width, canvas.height); }
+
+            if (loadedState.front) {
+                const smallWidth = 320; const smallHeight = 426; const marginX = 60; const marginY = 60;
+                const borderRadius = 40; 
+                const borderWidth = 5; // 테두리 두께 5
+                
+                ctx.save(); ctx.beginPath(); ctx.roundRect(marginX, marginY, smallWidth, smallHeight, borderRadius); ctx.clip();
+                drawImageCover(ctx, frontImg, marginX, marginY, smallWidth, smallHeight); ctx.restore();
+                ctx.beginPath(); ctx.roundRect(marginX, marginY, smallWidth, smallHeight, borderRadius);
+                ctx.lineWidth = borderWidth; ctx.strokeStyle = "black"; ctx.stroke();
+            }
+        }
+
+        function downloadImage() {
+            if (!loadedState.back && !loadedState.front) { alert("사진을 업로드해주세요!"); return; }
+            const link = document.createElement('a'); const date = new Date();
+            const modeSuffix = (currentMode === 'frame') ? 'Feed' : 'Capture';
+            link.download = `BeReal_${modeSuffix}_${date.getTime()}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.95); link.click();
+        }
+        
+        function drawImageCover(ctx, img, x, y, w, h) {
+            const imgRatio = img.width / img.height; const containerRatio = w / h;
+            let sx, sy, sw, sh;
+            if (containerRatio > imgRatio) { sw = img.width; sh = img.width / containerRatio; sx = 0; sy = (img.height - sh) / 2; } 
+            else { sh = img.height; sw = img.height * containerRatio; sy = 0; sx = (img.width - sw) / 2; }
+            ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
