@@ -214,105 +214,115 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             if (currentMode === 'frame') { drawFrameMode(); } else { drawFullScreenMode(); }
         }
+// drawFrameMode 함수 전체를 이걸로 교체하세요.
+function drawFrameMode() {
+    const mainMarginX = 50; const mainMarginTop = 150;
+    const mainW = canvas.width - (mainMarginX * 2);
+    const mainH = mainW * (4 / 3);
+    const mainX = mainMarginX; const mainY = mainMarginTop;
+    const mainRadius = 36;
 
-        function drawFrameMode() {
-            const mainMarginX = 50; const mainMarginTop = 150;
-            const mainW = canvas.width - (mainMarginX * 2);
-            const mainH = mainW * (4 / 3);
-            const mainX = mainMarginX; const mainY = mainMarginTop;
-            const mainRadius = 36;
+    // --- 배경 그리기 ---
+    if (loadedState.back) {
+        ctx.save(); ctx.beginPath(); ctx.roundRect(mainX, mainY, mainW, mainH, mainRadius); ctx.clip();
+        drawImageCover(ctx, backImg, mainX, mainY, mainW, mainH); ctx.restore();
+    }
 
-            if (loadedState.back) {
-                ctx.save(); ctx.beginPath(); ctx.roundRect(mainX, mainY, mainW, mainH, mainRadius); ctx.clip();
-                drawImageCover(ctx, backImg, mainX, mainY, mainW, mainH); ctx.restore();
-            }
+    // --- 태그 버튼 그리기 (그림자 + 폰트 변경) ---
+    if (loadedState.back && tagToggle.checked) {
+        const tagText = tagInput.value.trim() || "TAG";
+        
+        // [수정 1] 폰트 변경: 'Inter' 대신 더 둥글고 세련된 시스템 폰트 적용
+        // 원하시는 다른 웹폰트가 있다면 'Inter' 자리에 그 폰트 이름을 넣으면 됩니다.
+        ctx.font = "700 40px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+        
+        const iconSize = 60; 
+        const iconPadding = 0;
+        const textMetrics = ctx.measureText(tagText);
+        const contentW = iconSize + iconPadding + textMetrics.width;
+        const btnPaddingX = 60; 
+        const btnH = 80; 
+        const btnW = contentW + btnPaddingX; 
+        const btnMargin = 30;
+        const btnX = mainX + btnMargin; const btnY = (mainY + mainH) - btnH - btnMargin;
+        const sidePadding = btnPaddingX / 2;
+        const contentStartX = btnX + sidePadding;
 
-            if (loadedState.back && tagToggle.checked) {
-                const tagText = tagInput.value.trim() || "TAG";
-                
-                // [수정 1] 폰트 크기 키움 (36px -> 44px)
-                ctx.font = "700 36px 'Inter', sans-serif";
-                
-                // [수정 2] 아이콘 크기 키움 (40 -> 52) / 간격 좁힘 (15 -> 10)
-                const iconSize = 60; 
-                const iconPadding = 0;
-                
-                const textMetrics = ctx.measureText(tagText);
-                const contentW = iconSize + iconPadding + textMetrics.width;
-                
-                // 버튼 좌우 여백 (한쪽 40px 유지)
-                const btnPaddingX = 60; 
-                const btnH = 80; // 버튼 높이도 70 -> 80으로 살짝 키움
-                const btnW = contentW + btnPaddingX; 
-                const btnMargin = 30;
-                const btnX = mainX + btnMargin; const btnY = (mainY + mainH) - btnH - btnMargin;
+        ctx.save(); 
+        // [수정 2] 검은색 블러 그림자 추가
+        // shadowColor: 그림자 색 (검정색 + 투명도 50%)
+        // shadowBlur: 블러 정도 (숫자가 클수록 더 퍼짐)
+        // shadowOffsetX/Y: 그림자 위치 (0이면 정중앙)
+        ctx.shadowColor = "rgba(0, 0, 0, 0.2)"; 
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0; // 약간 아래로 내려오게
 
-                const sidePadding = btnPaddingX / 2;
-                const contentStartX = btnX + sidePadding;
+        ctx.fillStyle = "white"; 
+        ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 40); ctx.fill();
+        
+        // 중요: 그림자 설정이 다른 요소에 영향을 주지 않도록 여기서 restore 합니다.
+        ctx.restore(); 
 
-                ctx.save(); ctx.fillStyle = "white"; ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 40); ctx.fill();
-                ctx.fillStyle = "black"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-                
-                // [수정 3] 수직 중앙 정렬 공식 적용
-                // 아이콘 Y위치 = 버튼Y + (버튼높이 - 아이콘높이) / 2
-                const iconY = btnY + (btnH - iconSize) / 2 + 4;
-                
-                if (loadedState.tag) { 
-                    ctx.drawImage(iconTag, contentStartX, iconY, iconSize, iconSize); 
-                }
-                
-                // 텍스트 Y위치 = 버튼Y + (버튼높이 / 2) + 미세보정(3)
-                ctx.fillText(tagText, contentStartX + iconSize + iconPadding, btnY + (btnH/2)+1);
-                ctx.restore();
-            }
-
-            if (loadedState.front) {
-                const smallW = 300; const smallH = 400; const padding = 30;
-                const smallX = mainX + padding; const smallY = mainY + padding;
-                const smallRadius = 28;
-                ctx.save(); ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius); ctx.clip();
-                drawImageCover(ctx, frontImg, smallX, smallY, smallW, smallH); ctx.restore();
-                ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius);
-                
-                // 테두리 두께 5
-                ctx.lineWidth = 5; 
-                ctx.strokeStyle = "black"; ctx.stroke();
-            }
-
-            const centerX = canvas.width / 2;
-            let currentY = mainY + mainH + 80;
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-
-            const captionText = captionInput.value;
-            ctx.font = "600 48px 'Inter', sans-serif";
-            if (captionText) { ctx.fillStyle = "#ffffff"; ctx.fillText(captionText, centerX, currentY); } 
-            else { ctx.fillStyle = "#777777"; ctx.fillText("Add a caption...", centerX, currentY); }
-            
-            currentY += 100;
-
-            const locationText = locationInput.value;
-            if (locationText) {
-                ctx.font = "600 40px 'Inter', sans-serif";
-                const locIconSize = 36; const locIconPadding = 12;
-                const locTextW = ctx.measureText(locationText).width;
-                const locContentW = locIconSize + locIconPadding + locTextW;
-                const pillPaddingX = 36; const pillPaddingY = 24;
-                const pillW = locContentW + (pillPaddingX * 2);
-                const pillH = locIconSize + (pillPaddingY * 2);
-                const pillX = centerX - (pillW / 2);
-                const pillY = currentY - (pillH / 2);
-                const pillRadius = pillH / 2;
-
-                ctx.save();
-                ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-                ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, pillRadius); ctx.fill(); ctx.restore();
-
-                const contentStartX = centerX - (locContentW / 2);
-                if (loadedState.loc) { ctx.drawImage(iconLoc, contentStartX, currentY - (locIconSize/2), locIconSize, locIconSize); }
-                ctx.fillStyle = "#ffffff"; ctx.textAlign = "left";
-                ctx.fillText(locationText, contentStartX + locIconSize + locIconPadding, currentY);
-            }
+        // 텍스트와 아이콘 그리기 (그림자 없이)
+        ctx.save();
+        ctx.fillStyle = "black"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        const iconY = btnY + (btnH - iconSize) / 2 + 6;
+        if (loadedState.tag) { 
+            ctx.drawImage(iconTag, contentStartX, iconY, iconSize, iconSize); 
         }
+        // 위에서 설정한 폰트가 적용됩니다.
+        ctx.fillText(tagText, contentStartX + iconSize + iconPadding, btnY + (btnH/2) + 2);
+        ctx.restore();
+    }
+
+    // --- PIP(작은 사진) 그리기 ---
+    if (loadedState.front) {
+        const smallW = 300; const smallH = 400; const padding = 30;
+        const smallX = mainX + padding; const smallY = mainY + padding;
+        const smallRadius = 28;
+        ctx.save(); ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius); ctx.clip();
+        drawImageCover(ctx, frontImg, smallX, smallY, smallW, smallH); ctx.restore();
+        ctx.beginPath(); ctx.roundRect(smallX, smallY, smallW, smallH, smallRadius);
+        ctx.lineWidth = 5; 
+        ctx.strokeStyle = "black"; ctx.stroke();
+    }
+
+    // --- 캡션 및 위치 정보 그리기 ---
+    const centerX = canvas.width / 2;
+    let currentY = mainY + mainH + 80;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+    const captionText = captionInput.value;
+    ctx.font = "600 48px 'Inter', sans-serif"; // 캡션 폰트는 그대로 유지
+    if (captionText) { ctx.fillStyle = "#ffffff"; ctx.fillText(captionText, centerX, currentY); } 
+    else { ctx.fillStyle = "#777777"; ctx.fillText("Add a caption...", centerX, currentY); }
+    
+    currentY += 100;
+
+    const locationText = locationInput.value;
+    if (locationText) {
+        ctx.font = "600 40px 'Inter', sans-serif"; // 위치 폰트는 그대로 유지
+        const locIconSize = 36; const locIconPadding = 12;
+        const locTextW = ctx.measureText(locationText).width;
+        const locContentW = locIconSize + locIconPadding + locTextW;
+        const pillPaddingX = 36; const pillPaddingY = 24;
+        const pillW = locContentW + (pillPaddingX * 2);
+        const pillH = locIconSize + (pillPaddingY * 2);
+        const pillX = centerX - (pillW / 2);
+        const pillY = currentY - (pillH / 2);
+        const pillRadius = pillH / 2;
+
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+        ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, pillRadius); ctx.fill(); ctx.restore();
+
+        const contentStartX = centerX - (locContentW / 2);
+        if (loadedState.loc) { ctx.drawImage(iconLoc, contentStartX, currentY - (locIconSize/2), locIconSize, locIconSize); }
+        ctx.fillStyle = "#ffffff"; ctx.textAlign = "left";
+        ctx.fillText(locationText, contentStartX + locIconSize + locIconPadding, currentY);
+    }
+}
 
         function drawFullScreenMode() {
             if (loadedState.back) { drawImageCover(ctx, backImg, 0, 0, canvas.width, canvas.height); }
